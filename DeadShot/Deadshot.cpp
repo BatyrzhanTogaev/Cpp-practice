@@ -8,8 +8,15 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <thread>
+#include <chrono>
 
 using namespace std; //Упрощаем обращение к библеотеке STD
+
+//Фугкция принимает число и останавливает код на заданое время
+void pause(short second){
+    this_thread::sleep_for(chrono::seconds(second));
+}
 
 //Функция принимает данные любого типа и выводить на экран
 template <typename T>
@@ -63,14 +70,34 @@ int main() {
 
     while (user_live > 0 && comp_live > 0) {
         if (change_stroke) {
+            pause(1);
             print("--------------------");
             print("Твой ход...");
             print("Нажми enter чтобы выстрелить");
             cin.get(); // Ждем нажатия Enter
 
-            //Проверка на количество холостых патронов
-            if (blank_cartridges == 0) {
-                print("выстрел боевым патроном.");
+            short random_number = (rand() % 2) + 1;
+                
+            if (random_number == 1) {
+                if (blank_cartridges > 0){
+                print("Ха, повезло! Холостой патрон.");
+                blank_cartridges--;
+                }
+                else {
+                    print("БОЕВООООЙ... минус жизнь");
+                    live_ammunition--;
+                    user_live--;
+                    print("Твои жизни: ", user_live);
+
+                    if (user_live == 0) {
+                        print("Вы погибли");
+                        break;
+                    }
+                }
+            }
+            
+            else if (random_number == 2 && live_ammunition > 0) {
+                print("Упс, боевой патрон. Минус жизнь.");
                 user_live--;
                 live_ammunition--;
                 print("Твои жизни: ", user_live);
@@ -80,70 +107,52 @@ int main() {
                     break;
                 }
             }
-            //Если есть патроны оба типа зупускается рандом для выстрела
-            else {
-                short random_number = (rand() % 2) + 1;
-                if (random_number == 1 && blank_cartridges > 0) {
-                    print("Ха, повезло! Холостой патрон.");
-                    blank_cartridges--;
-                } 
-                
-                else if (random_number == 2 && live_ammunition > 0) {
-                    print("Упс, боевой патрон. Минус жизнь.");
-                    user_live--;
+            }
+        
+        else {
+            short random_number = (rand() % 2) + 1;
+            
+            pause(3);
+            print("--------------------");
+            print("Ход компьютера... ВЫСТРЕЛ");
+            
+
+            if (random_number == 1) {
+                if (blank_cartridges > 0){
+                print("Ха, повезло! Холостой патрон.");
+                blank_cartridges--;
+                }
+                else {
+                    print("БОЕВООООЙ... минус жизнь");
                     live_ammunition--;
-                    print("Твои жизни: ", user_live);
+                    comp_live--;
+                    print("Жизни компьютера: ", comp_live);
 
                     if (user_live == 0) {
-                        print("Вы погибли");
+                        print("Компьютер погиб");
+                        print("Вы выйграли");
                         break;
                     }
                 }
-            }
-        } 
-        
-        else {
-            print("--------------------");
-            print("Ход компьютера... ВЫСТРЕЛ");
-            //Проверка на количество холостых патронов            
-            if (blank_cartridges == 0) {
-                print("Компьютер выстрелил боевым патроном.");
+            } 
+            
+            else if (random_number == 2 && live_ammunition > 0) {
+                print("Упс, боевой патрон. Минус жизнь.");
                 comp_live--;
                 live_ammunition--;
                 print("Жизни компьютера: ", comp_live);
 
-                if (comp_live == 0) {
+                if (user_live == 0) {
                     print("Компьютер погиб");
+                    print("Вы выйграли");
                     break;
-                }
-            } 
-            
-            //Если есть патроны оба типа зупускается рандом для выстрела
-            else {
-                short random_number = (rand() % 2) + 1;
-
-                if (random_number == 1 && blank_cartridges > 0) {
-                    print("Компьютеру повезло! Холостой патрон.");
-                    blank_cartridges--;
-                } 
-                
-                else if (random_number == 2 && live_ammunition > 0) {
-                    print("Компьютер выстрелил боевым патроном. Минус жизнь.");
-                    comp_live--;
-                    live_ammunition--;
-                    print("Жизни компьютера: ", comp_live);
-
-                    if (comp_live == 0) {
-                        print("Компьютер погиб");
-                        break;
-                    }
                 }
             }
         }
 
-        //Меняем ход путем измение булевого значения
-        change_stroke = !change_stroke;
+    change_stroke = !change_stroke; //Меняем ход путем измение булевого значения
     }
+
 
     return 0;
 }
